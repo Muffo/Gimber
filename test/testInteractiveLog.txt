@@ -1,0 +1,11 @@
+interactive
+Traceback (most recent call last):
+  File "C:\Python27\lib\runpy.py", line 162, in _run_module_as_main
+    "__main__", fname, loader, pkg_name)
+  File "C:\Python27\lib\runpy.py", line 72, in _run_code
+    exec code in run_globals
+  File "C:\Users\grandian\Documents\Personal\aviw\gimber\__main__.py", line 28, in <module>
+    import interactive
+  File "C:\Users\grandian\Documents\Personal\aviw\gimber\interactive.py", line 1, in <module>
+    import gevent; gevent.monkey.patch_all()
+AttributeError: 'module' object has no attribute 'monkey'

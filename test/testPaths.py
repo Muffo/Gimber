@@ -32,13 +32,20 @@ class PathTests(unittest.TestCase):
 
 
 class PathParsingTests(unittest.TestCase):
-    def testDict(self):
+    def testMarker(self):
         marker = PathParser.fromDict({
             'ptype': 'marker',
             'point': [10, 12]
         })
         self.assertIsInstance(marker, Marker)
 
+        self.assertRaises(KeyError, PathParser.fromDict, {
+            'ptype': 'marker',
+            'points': [10, 12]
+        })
+
+
+    def testLine(self):
         line = PathParser.fromDict({
             'ptype': 'line',
             'points': [[10, 12], [13, 15]]
@@ -50,8 +57,10 @@ class PathParsingTests(unittest.TestCase):
             'point': [[10, 12], [13, 15]]
         })
 
-        self.assertRaises(KeyError, PathParser.fromDict, {
-            'ptype': 'marker',
+
+    def testNotExisting(self):
+        self.assertRaises(ValueError, PathParser.fromDict, {
+            'ptype': 'point',
             'points': [10, 12]
         })
 

@@ -9,6 +9,10 @@
 # Licence:      <your licence>
 #-------------------------------------------------------------------------------
 
+import base64
+
+import numpy as np
+
 from paths import PathParser
 
 class GenericAction(object):
@@ -34,7 +38,8 @@ class GenericAction(object):
     @classmethod
     def fromDict(cls, d):
         cls.checkDictAtype(d)
-        return cls(paths)
+        # TODO: check that there are no extra parameters in the dictionary
+        return cls()
 
 
 class AddPaths(GenericAction):
@@ -44,10 +49,14 @@ class AddPaths(GenericAction):
 
     atype = "addpaths"
 
+    @property
+    def paths(self):
+        return self._paths
+
     @classmethod
     def fromDict(cls, d):
         cls.checkDictAtype(d)
-        if d.has_key('paths'):
+        if not d.has_key('paths'):
             raise KeyError("AddPaths requires 'paths': a list of paths")
         paths = [PathParser.fromDict(pd) for pd in d['paths']]
         return AddPaths(paths)
@@ -56,7 +65,7 @@ class AddPaths(GenericAction):
     def dict(self):
         return {
             'atype': self.atype,
-            'paths': [e.dict for e in self._paths]
+            'paths': [e.dict for e in self.paths]
         }
 
 
@@ -75,10 +84,31 @@ class EmptyAction(GenericAction):
 
 
 class LoadImage(GenericAction):
-##    def __init__(self):
-##        super(LoadImage, self).__init__()
+    def __init__(self, image):
+        # super(AddPaths, self).__init__()
+        self._image = image
 
     atype = "loadimage"
+
+    @property
+    def image(self):
+        return self._image
+
+    @classmethod
+    def fromDict(cls, d):
+        cls.checkDictAtype(d)
+        if not d.has_key('image'):
+            raise KeyError("AddPaths requires 'paths': a list of paths")
+        if not d.has_key('shape'):
+            raise KeyError("AddPaths requires 'shape': [h, w] of the image")
+        if len(d['shape']) != 2:
+            raise ValueError("Unvalid format for AddPaths' parameter 'shape'")
+
+        # TODO: add support for custom dtype
+        imageBuffer = base64.decodestring(d['image'])
+        image = np.frombuffer(imageBuffer, dtype=np.uint8)
+        image.shape = d['shape']
+        return LoadImage(image)
 
 
 

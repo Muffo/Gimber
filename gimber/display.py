@@ -9,7 +9,7 @@
 # Licence:     <your licence>
 #-------------------------------------------------------------------------------
 
-
+from tiles import *
 from actions import *
 from paths import *
 
@@ -40,6 +40,7 @@ class Display(object):
 
         if isinstance(action, LoadImage):
             self._replaceActions(LoadImage, EmptyAction)
+            self._tileCreator = TileCreator(action.image)
 
         self._actions.append(action)
 
@@ -62,6 +63,5 @@ class Display(object):
 
 
     def loadImage(self, image):
-        action = LoadImage()
+        action = LoadImage(image)
         self.do(action)
-        self.tileCreator = TileCreator(image)

@@ -16,9 +16,10 @@ Then, download the source code here and add the gimber package in your PYTHONPAT
 
 These Python libraries must be installed in order to run the server on you machine:
 
-- [OpenCV](http://www.opencv.org): used for the image processing and compression
-- [BottlePy](http://bottlepy.org): used for as web server
+- [OpenCV](http://www.opencv.org): image processing and compression
+- [BottlePy](http://bottlepy.org): web server
 - [Gevent](http://www.gevent.org): enables multithreading in the server (much faster!!)
+- [Urllib3](https://github.com/shazow/urllib3) + [Requests](http://docs.python-requests.org): more efficient HTTP requests with keep alive
 
 [BottlePy](http://bottlepy.org) consists of a single file and it can be manually copied in the PYTHONPATH.
 

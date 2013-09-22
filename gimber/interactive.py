@@ -1,15 +1,23 @@
+import os
+import argparse
+import json
+import traceback
+
 from gevent import monkey; monkey.patch_all()
 import bottle
-import argparse
+
 from parsers import serverParser, genericParser
 from tiles import TileCreator, GenericTileServer
-import os
+from display import Display
+from actions import ActionParser
+
+
 
 
 class InteractiveTileServer(GenericTileServer):
     def __init__(self, tileSize, imageFormat, compression):
         super(InteractiveTileServer, self).__init__(tileSize, imageFormat, compression)
-        self.tileCreators = {}
+        self._displays = {}
 
     @classmethod
     def fromArgsConf(cls, conf):
@@ -17,33 +25,86 @@ class InteractiveTileServer(GenericTileServer):
             imageFormat=conf.format, compression=conf.compression)
 
     @property
-    def rootDir(self):
-        return self._rootDir
+    def displays(self):
+        return self._displays
 
 
-    def hello(self):
+    def home(self):
         # TODO: return a nice page with all the parameters
         return "The server is running!"
 
-    def echo(self, stringa):
-        return str(stringa)
+    def info(self):
+        # TODO: return server info in JSON format
+        return "The server is running!"
 
 
-    '''
-    def getTile(self, filename, x, y, z):
+    def create(self):
+        createDict = json.loads(bottle.request.body.read())
+        if not createDict.has_key('displayId'):
+            return self.exception('The displayId to create has not been specified')
+        displayId = createDict['displayId']
+        if self.displays.has_key(displayId):
+            return self.exception("The display %s already exists" % (displayId))
 
-        if not self.tileCreators.has_key(filename):
-            fileFullName = os.path.join(self.rootDir, filename)
-            self.tileCreators[filename] = TileCreator.fromFile(fileFullName, self.tileSize)
+        self.displays[displayId] = Display()
+        return {
+            'result': 'ok',
+            'message': "Display %s has been created" % (displayId)
+        }
 
-        tile = self.tileCreators[filename].getTile(x, y, z)
-        if tile is None:
-            return bottle.static_file("1x1.png", root="resources/")
+    def delete(self):
+        deleteDict = json.loads(bottle.request.body.read())
+        if not deleteDict.has_key('displayId'):
+            return self.exception('The displayId to delete has not been specified')
+        displayId = deleteDict['displayId']
+        if not self.displays.has_key(displayId):
+            return self.exception("The display %s does not exist" % (displayId))
 
-        bottle.response.content_type = self.imageEncoder.type
-        return self.imageEncoder.encode(tile)
+        self.displays[displayId] = None
+        self.displays.pop(displayId, None)
+        return {
+            'result': 'ok',
+            'message': "Display %s has been deleted" % (displayId)
+        }
 
-    '''
+
+    def do(self, displayId):
+        if not self.displays.has_key(displayId):
+            return self.exception("The display %s does not exist" % (displayId))
+
+        display = self.displays[displayId]
+        try:
+            actionsDict = json.loads(bottle.request.body.read())
+            actions = ActionParser.fromDict(actionsDict)
+            display.do(actions)
+        except Exception as e:
+            return self.exception(e.message, details=traceback.format_exc())
+
+        return {
+            'result': 'ok',
+            'message': "Action done on display %s" % (displayId)
+        }
+
+
+    def actions(self, displayId, last):
+        if not self.displays.has_key(displayId):
+            return self.exception("The display %s does not exist" % (displayId))
+
+        display = self.displays[displayId]
+        try:
+            actions = display.actionsFrom(last)
+        except Exception as e:
+            return self.exception(e.message, details=traceback.format_exc())
+
+        return {
+            'result': 'ok',
+            'actions': [action.dict for action in actions]
+        }
+
+
+
+
+
 
 
 def run(argv):
@@ -55,12 +116,14 @@ def run(argv):
     Etc...
     """
 
-    print "Here we go"
-
     conf = parser.parse_args(argv)
     tileServer = InteractiveTileServer.fromArgsConf(conf)
-    bottle.route('/hello', 'GET', tileServer.hello)
-    bottle.route('/echo/<stringa>', 'GET', tileServer.echo)
+    bottle.route('/', 'GET', tileServer.home)
+    bottle.route('/info', 'GET', tileServer.info)
+    bottle.route('/create', 'POST', tileServer.create)
+    bottle.route('/delete', 'POST', tileServer.delete)
+    bottle.route('/do/<displayId>', 'POST', tileServer.do)
+    bottle.route('/actions/<displayId>/<last:int>', 'GET', tileServer.actions)
 
     # bottle.route('/tile/<z:int>/<x:int>/<y:int>/<filename:path>',
     #               'GET', tileServer.getTile)

@@ -8,7 +8,7 @@ import bottle
 
 from parsers import serverParser, genericParser
 from tiles import TileCreator, GenericTileServer
-from display import Display
+from display import LocalDisplay
 from actions import ActionParser
 
 
@@ -46,7 +46,7 @@ class InteractiveTileServer(GenericTileServer):
         if self.displays.has_key(displayId):
             return self.exception("The display %s already exists" % (displayId))
 
-        self.displays[displayId] = Display()
+        self.displays[displayId] = LocalDisplay()
         return {
             'result': 'ok',
             'message': "Display %s has been created" % (displayId)
@@ -74,9 +74,9 @@ class InteractiveTileServer(GenericTileServer):
 
         display = self.displays[displayId]
         try:
-            actionsDict = json.loads(bottle.request.body.read())
-            actions = ActionParser.fromDict(actionsDict)
-            display.do(actions)
+            actionDict = json.loads(bottle.request.body.read())
+            action = ActionParser.fromDict(actionDict)
+            display.do(action)
         except Exception as e:
             return self.exception(e.message, details=traceback.format_exc())
 

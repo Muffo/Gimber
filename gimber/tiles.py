@@ -24,10 +24,6 @@ class TileCreator(object):
         self._image = image
         self._tileSize = float(tileSize)
 
-##    @image.setter
-##    def image(self, image):
-##        # Here I could save an hash of the image to be used later...
-##        self._image = image
 
     @classmethod
     def fromFile(cls, filePath, tileSize=256):
@@ -43,6 +39,12 @@ class TileCreator(object):
     @property
     def image(self):
         return self._image
+
+##    @image.setter
+##    def image(self, image):
+##        # TODO: Here I could save an hash of the image to be used later...
+##        self._image = image
+
 
     @property
     def height(self):
@@ -173,6 +175,8 @@ class ImageEncoder(object):
         return encodedImage.tostring()
 
 
+#-------------------------------------------------------------------------------
+
 
 class GenericTileServer(object):
     def __init__(self, tileSize, imageFormat, compression):
@@ -185,11 +189,9 @@ class GenericTileServer(object):
     def tileSize(self):
         return self._tileSize
 
-
     @property
     def imageEncoder(self):
         return self._imageEncoder
-
 
     @property
     def imageFormat(self):
@@ -198,6 +200,18 @@ class GenericTileServer(object):
     @property
     def compression(self):
         return self.imageEncoder.params
+
+
+    def exception(self, message, details=None):
+        errorDict = {
+            'result': 'error',
+            'message': message,
+        }
+
+        if details is not None:
+            errorDict['details'] = details
+
+        return errorDict
 
 
 

@@ -11,9 +11,6 @@ parser.add_argument("mode", help="Running mode of gimber",
                     choices=["tilesgen", "interactive", "webserver"])
 
 conf = parser.parse_args(sys.argv[1:2])
-
-print conf.mode
-
 argv = sys.argv[2:]
 
 if conf.mode == "tilesgen":

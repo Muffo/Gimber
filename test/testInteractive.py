@@ -18,7 +18,7 @@ import json
 import urllib3
 import requests
 
-class TestGeneralCom(unittest.TestCase):
+class TestInteractive(unittest.TestCase):
 
     def setUp(self):
         self.baseUrl = 'http://localhost:8080'
@@ -27,7 +27,6 @@ class TestGeneralCom(unittest.TestCase):
         self.doUrl = self.baseUrl + '/do'
         self.actionsUrl = self.baseUrl + '/actions'
         self.session = requests.Session()
-
 ##        log = open('testInteractiveLog.txt', 'w')
 ##
 ##        self.serverProc = subprocess.Popen('python -m gimber interactive',
@@ -49,13 +48,8 @@ class TestGeneralCom(unittest.TestCase):
 
 
     def testCreateDelete(self):
-        displayId1 = {
-            "displayId": "disp1"
-        }
-
-        displayId2 = {
-            "displayId": "disp2"
-        }
+        displayId1 = {"displayId": "disp1"}
+        displayId2 = {"displayId": "disp2"}
 
         response = self.getJson(self.createUrl, displayId1)
         self.assertEqual(response['result'], "ok")
@@ -73,9 +67,7 @@ class TestGeneralCom(unittest.TestCase):
 
 
     def testDoAddPaths(self):
-        displayId1 = {
-            "displayId": "disp1"
-        }
+        displayId1 = {"displayId": "disp1"}
 
         action = {
             'atype': 'addpaths',
@@ -104,8 +96,6 @@ class TestGeneralCom(unittest.TestCase):
 
         response = self.getJson(self.deleteUrl, displayId1)
         self.assertEqual(response['result'], "ok")
-
-
 
 
 

@@ -9,6 +9,8 @@
 # Licence:     <your licence>
 #-------------------------------------------------------------------------------
 
+import os
+
 import cv2
 import numpy as np
 
@@ -184,6 +186,8 @@ class GenericTileServer(object):
         self._imageFormat = imageFormat
         self._compression = compression
         self._imageEncoder = ImageEncoder(imageFormat, compression)
+        self._root = os.path.dirname(__file__)
+
 
     @property
     def tileSize(self):
@@ -214,6 +218,9 @@ class GenericTileServer(object):
         return errorDict
 
 
+    def emptyTile(self):
+        resourcesPath = os.path.join(self._root, 'resources')
+        return bottle.static_file("img/1x1.png", root=resourcesPath)
 
 
 

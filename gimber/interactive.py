@@ -88,7 +88,7 @@ class InteractiveTileServer(GenericTileServer):
 
     def actions(self, displayId, last):
         if not self.displays.has_key(displayId):
-            return self.exception("The display %s does not exist" % (displayId))
+            return self.exception("Display does not exist: %s" % (displayId))
 
         display = self.displays[displayId]
         try:
@@ -101,9 +101,36 @@ class InteractiveTileServer(GenericTileServer):
             'actions': [action.dict for action in actions]
         }
 
+    def htmlError(self, message):
+        errorTpl = os.path.join(self._root, 'resources/error')
+        return bottle.template(errorTpl, message=message)
 
 
+    def tile(self, displayId, x, y, z):
+        if not self.displays.has_key(displayId):
+            return htmlError("Display does not exist: %s" % (displayId))
 
+        display = self.displays[displayId]
+        tile = display.tileCreator.getTile(x, y, z)
+
+        if tile is None:
+            return self.emptyTile()
+
+        bottle.response.content_type = self.imageEncoder.type
+        return self.imageEncoder.encode(tile)
+
+
+    def view(self, displayId):
+        if not self.displays.has_key(displayId):
+            return htmlError("Display does not exist: %s" % (displayId))
+
+        viewTpl = os.path.join(self._root, 'resources/view')
+        return bottle.template(viewTpl, displayId=displayId)
+
+
+    def static(self, filename):
+        root = os.path.join(self._root, 'resources')
+        return bottle.static_file(filename, root=root)
 
 
 
@@ -124,6 +151,9 @@ def run(argv):
     bottle.route('/delete', 'POST', tileServer.delete)
     bottle.route('/do/<displayId>', 'POST', tileServer.do)
     bottle.route('/actions/<displayId>/<last:int>', 'GET', tileServer.actions)
+    bottle.route('/tile/<displayId>/<z:int>/<x:int>/<y:int>', 'GET', tileServer.tile)
+    bottle.route('/view/<displayId>', 'GET', tileServer.view)
+    bottle.route('/static/<filename:path>', 'GET', tileServer.static)
 
     # bottle.route('/tile/<z:int>/<x:int>/<y:int>/<filename:path>',
     #               'GET', tileServer.getTile)

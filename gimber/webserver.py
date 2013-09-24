@@ -25,14 +25,15 @@ class StaticTileServer(GenericTileServer):
         return "The interactive server is running!"
 
 
-    def getTile(self, filename, x, y, z):
+    def tile(self, filename, x, y, z):
         if not self.tileCreators.has_key(filename):
+            # TODO: empty the memory when files are not used anymore
             fileFullName = os.path.join(self.rootDir, filename)
             self.tileCreators[filename] = TileCreator.fromFile(fileFullName, self.tileSize)
 
         tile = self.tileCreators[filename].getTile(x, y, z)
         if tile is None:
-            return bottle.static_file("1x1.png", root="resources/")
+            return self.emptyTile()
 
         bottle.response.content_type = self.imageEncoder.type
         return self.imageEncoder.encode(tile)
@@ -59,7 +60,7 @@ def run(argv):
 
     tileServer = StaticTileServer.fromArgsConf(conf)
     bottle.route('/hello', 'GET', tileServer.hello)
-    bottle.route('/tile/<z:int>/<x:int>/<y:int>/<filename:path>', 'GET', tileServer.getTile)
+    bottle.route('/tile/<z:int>/<x:int>/<y:int>/<filename:path>', 'GET', tileServer.tile)
 
     bottle.run(host=conf.host, port=conf.port,
                 debug=conf.debug, quiet=conf.quiet, server='gevent')

@@ -255,6 +255,9 @@ class RemoteDisplayManager(object):
 
     def create(self, name):
         """ Create the display in the interactive server
+
+        :params name: the name used to identify the display
+        :returns: a RemoteDisplay object that can be used to interact with the display
         """
         reqJson = json.dumps({"displayId": name})
         response = self.session.post(self.createUrl, data=reqJson).json()
@@ -265,6 +268,8 @@ class RemoteDisplayManager(object):
 
     def delete(self, name):
         """ Delete the display in the interactive server
+
+        :params name: the name of the display to delete
         """
         reqJson = json.dumps({"displayId": name})
         response = self.session.post(self.deleteUrl, data=reqJson).json()

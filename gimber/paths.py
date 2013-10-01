@@ -1,21 +1,12 @@
-#-------------------------------------------------------------------------------
-# Name:        modulo1
-# Purpose:
-#
-# Author:      GrandiAn
-#
-# Created:     09/09/2013
-# Copyright:   (c) GrandiAn 2013
-# Licence:     <your licence>
-#-------------------------------------------------------------------------------
+""" Paths that can be showed on the display as vector overlays
+"""
 
 import cv2
 import numpy as np
 
 
 class Path(object):
-    """An abstract class that contains options and constants shared between
-    vector overlays (Polygon, Polyline, Circle)
+    """An abstract class that contains options and constants shared between vector overlays (Polygon, Polyline, Circle)
     """
     def __init__(self, options={}, extras={}):
         # Here I could add some validation
@@ -30,6 +21,8 @@ class Path(object):
 
     @property
     def ptype(self):
+        """ The Path type used in the dictionaries
+        """
         return type(self).ptype
 
     @property
@@ -44,6 +37,11 @@ class Path(object):
 
     @classmethod
     def checkDictPtype(cls, d):
+        """ Check whether the ptype of the dictionary matches the ptype of the class
+        """
+        if not d.has_key('ptype'):
+            raise ValueError("The dictionary for the Path does not contain the ptype")
+
         if d['ptype'] != cls.ptype:
             raise ValueError("Path type (ptype) does not match: %s != %s" %
                                                         (d['ptype'], cls.dtype))
@@ -51,6 +49,10 @@ class Path(object):
 
 
 class Marker(Path):
+    """ A marker that is positioned in a precise point of the image
+
+    :param point: a tuple/list of 2 elements (coordinates of the point)
+    """
     def __init__(self, point, options={}):
         super(Marker, self).__init__(options)
         if len(point) != 2:
@@ -85,6 +87,10 @@ class Marker(Path):
 
 
 class Line(Path):
+    """ A line between two points
+
+    :param points: 2 points (es: [[x1, y1], [x2, y2]] )
+    """
     def __init__(self, points, options={}):
         super(Line, self).__init__(options)
 
@@ -132,6 +138,8 @@ class Line(Path):
 
 
 class PathParser(object):
+    """ Utility class used to parse a dictionary that represents a path
+    """
     paths = [Marker, Line]
 
     @staticmethod

@@ -15,6 +15,7 @@ import requests
 from urlparse import urljoin
 import json
 import webbrowser
+from requests.exceptions import ConnectionError
 
 from tiles import *
 from actions import *
@@ -208,10 +209,15 @@ class RemoteDisplay(AbstractDisplay):
 class RemoteDisplayManager(object):
     """ A manager used to create and delete the displays on an interactive server
     """
-    def __init__(self, url):
+    def __init__(self, url="http://localhost:8080"):
         self._url = url
         self._displays = {}
         self._session = requests.Session()
+
+        try:
+            self.session.get(self.infoUrl)
+        except ConnectionError:
+            raise ConnectionError("Failed to connect to interactive server at url: " + url)
 
 
     @property
@@ -220,30 +226,48 @@ class RemoteDisplayManager(object):
 
 
     @property
+    def session(self):
+        """ Session used to increase the speed of the requests
+        """
+        return self._session
+
+
+    @property
     def createUrl(self):
         """ The Url of the API used to create a new display
         """
-        return urljoin(self._url, "create")
+        return urljoin(self.url, "create")
 
 
     @property
     def deleteUrl(self):
         """ The Url of the API used to delete a display
         """
-        return urljoin(self._url, "delete")
+        return urljoin(self.url, "delete")
+
+
+    @property
+    def infoUrl(self):
+        """ The Url of the API used to obtain the info of the remote server
+        """
+        return urljoin(self.url, "info")
 
 
     def create(self, name):
+        """ Create the display in the interactive server
+        """
         reqJson = json.dumps({"displayId": name})
-        response = self._session.post(self.createUrl, data=reqJson).json()
+        response = self.session.post(self.createUrl, data=reqJson).json()
         if response['result'] != "ok":
             raise ServerSideError.fromDict(response)
         return RemoteDisplay(name, self.url)
 
 
     def delete(self, name):
+        """ Delete the display in the interactive server
+        """
         reqJson = json.dumps({"displayId": name})
-        response = self._session.post(self.deleteUrl, data=reqJson).json()
+        response = self.session.post(self.deleteUrl, data=reqJson).json()
         if response['result'] != "ok":
             raise ServerSideError.fromDict(response)
 

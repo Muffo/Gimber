@@ -53,6 +53,7 @@ class AbstractDisplayTests(unittest.TestCase):
         self.assertIsInstance(actions[2], ClearPaths)
 
 
+
 class LocalDisplayTests(AbstractDisplayTests):
 
     def testAddPaths(self):
@@ -98,7 +99,12 @@ class LocalDisplayTests(AbstractDisplayTests):
         self.assertEqual(actions[0].dict['paths'][0]['ptype'], 'marker')
 
 
+
 class RemoteDisplayManagerTests(unittest.TestCase):
+
+    def testNotValidUrl(self):
+        self.assertRaises(ConnectionError, RemoteDisplayManager, "http://localhost:123")
+
     def testCreateDelete(self):
         rdm = RemoteDisplayManager("http://localhost:8080")
 
@@ -116,6 +122,7 @@ class RemoteDisplayManagerTests(unittest.TestCase):
         self.assertRaises(ServerSideError, rdm.delete, "disp2")
 
 
+
 class RemoteDisplayTests(AbstractDisplayTests):
 
     def testAddPaths(self):
@@ -123,6 +130,7 @@ class RemoteDisplayTests(AbstractDisplayTests):
         display = rdm.create("disp1")
         self.addPaths(display)
         rdm.delete("disp1")
+
 
     def testClear(self):
         rdm = RemoteDisplayManager("http://localhost:8080")

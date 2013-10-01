@@ -13,7 +13,6 @@ from actions import ActionParser
 
 
 
-
 class InteractiveTileServer(GenericTileServer):
     def __init__(self, tileSize, imageFormat, compression):
         super(InteractiveTileServer, self).__init__(tileSize, imageFormat, compression)
@@ -51,6 +50,7 @@ class InteractiveTileServer(GenericTileServer):
             'result': 'ok',
             'message': "Display %s has been created" % (displayId)
         }
+
 
     def delete(self):
         deleteDict = json.loads(bottle.request.body.read())
@@ -101,6 +101,7 @@ class InteractiveTileServer(GenericTileServer):
             'actions': [action.dict for action in actions]
         }
 
+
     def htmlError(self, message):
         errorTpl = os.path.join(self._root, 'resources/error')
         return bottle.template(errorTpl, message=message)
@@ -108,9 +109,13 @@ class InteractiveTileServer(GenericTileServer):
 
     def tile(self, displayId, x, y, z):
         if not self.displays.has_key(displayId):
-            return htmlError("Display does not exist: %s" % (displayId))
+            return self.htmlError("Display does not exist: %s" % (displayId))
 
         display = self.displays[displayId]
+
+        if display.tileCreator is None:
+            return self.emptyTile()
+
         tile = display.tileCreator.getTile(x, y, z)
 
         if tile is None:
@@ -122,7 +127,7 @@ class InteractiveTileServer(GenericTileServer):
 
     def view(self, displayId):
         if not self.displays.has_key(displayId):
-            return htmlError("Display does not exist: %s" % (displayId))
+            return self.htmlError("Display does not exist: %s" % (displayId))
 
         viewTpl = os.path.join(self._root, 'resources/view')
         return bottle.template(viewTpl, displayId=displayId)
@@ -160,7 +165,6 @@ def run(argv):
 
     bottle.run(host=conf.host, port=conf.port,
                 debug=conf.debug, quiet=conf.quiet, server='gevent')
-
 
 
 

@@ -1,52 +1,83 @@
-#-------------------------------------------------------------------------------
-# Name:        modulo1
-# Purpose:
-#
-# Author:      GrandiAn
-#
-# Created:     09/09/2013
-# Copyright:   (c) GrandiAn 2013
-# Licence:     <your licence>
-#-------------------------------------------------------------------------------
+""" Display
+
+The display is the object used to show the images and perform actions on it like adding markers, lines, etc ...
+
+The module contains the definition of different types of display:
+- AbstractDisplay: abstract class defining the properties shared by all the displays
+- LocalDisplay: a display that is typically created by the interactive server
+- RemoteDisplay: a proxy that is used to interact with a LocalDisplay on a remote machine
+
+In addition the RemoteDisplayManager is used to create/delete the displays on a remote machine
+
+"""
 
 import requests
 from urlparse import urljoin
 import json
+import webbrowser
 
 from tiles import *
 from actions import *
 from paths import *
 
 class AbstractDisplay(object):
+    """ AbstractDisplay that provides basic features for all the display
+
+    Do not directly use this class
+    """
     def __init__(self):
         raise RuntimeError("Cannot create an instance of AbstractDisplay")
 
+
     def actionsFrom(self, last):
+        """ Actions executed on the display from "last"
+
+        The client should keep track of the "last" (progressive integer) action that has asked
+        Abstract method: implement in the concrete classes
+        """
         raise NotImplementedError()
 
 
     def do(self, action):
+        """Execute an action on the display
+
+        Abstract method: implement in the concrete classes
+        """
         raise NotImplementedError()
 
 
     def addMarker(self, point, options={}):
+        """ Add a marker to the display
+
+        :param point: the coordinates of the Marker
+        :param options: a dictionary containing the options of the Marker
+        """
         marker = Marker(point, options)
         action = AddPaths([marker])
         self.do(action)
 
 
     def addLine(self, points, options={}):
+        """ Add a marker to the display
+
+        :param point: the coordinates of two points of the Line
+        :param options: a dictionary containing the options of the Line
+        """
         line = Line(points, options)
         action = AddPaths([line])
         self.do(action)
 
 
     def clear(self):
+        """ Clear the display removing all the Paths (Markers, Line, ...)
+        """
         action = ClearPaths()
         self.do(action)
 
 
     def loadImage(self, image):
+        """ Load the image in the display
+        """
         action = LoadImage(image)
         self.do(action)
 
@@ -54,6 +85,8 @@ class AbstractDisplay(object):
 
 
 class LocalDisplay(AbstractDisplay):
+    """ A display that is created and used in a local context
+    """
     def __init__(self):
         self._tileCreator = None
         self._actions = []
@@ -94,13 +127,19 @@ class LocalDisplay(AbstractDisplay):
 
 
 class ServerSideError(Exception):
+    """ Exception raised when the server encountered an error
+    """
     def __init__(self, message, details=""):
-         self.message = message
-         self.details = details
+        self.message = message
+        self.details = details
 
 
     @classmethod
     def fromDict(cls, d):
+        """ Create the object starting from a dictionary
+
+        The dictionary must have the key 'message' and an optional key 'details'
+        """
         if d.has_key('details'):
             return cls(d['message'], d['details'])
         else:
@@ -113,6 +152,11 @@ class ServerSideError(Exception):
 
 
 class RemoteDisplay(AbstractDisplay):
+    """ A proxy used to communicate with a remote display that has been instantiated on an interactive server
+
+    :param name: the name used to identify the display
+    :param url: the url of the interactive server that contains the display
+    """
     def __init__(self, name, url):
         self._name = name
         self._url = url
@@ -131,12 +175,12 @@ class RemoteDisplay(AbstractDisplay):
 
     @property
     def doUrl(self):
-        return urljoin(self._url, "do/" + self.name)
+        return urljoin(self.url, "do/" + self.name)
 
 
     @property
     def actionsUrl(self):
-        return urljoin(self._url, "actions/" + self.name)
+        return urljoin(self.url, "actions/" + self.name)
 
 
     def actionsFrom(self, last):
@@ -154,8 +198,16 @@ class RemoteDisplay(AbstractDisplay):
             raise ServerSideError.fromDict(response)
 
 
+    def show(self):
+        """ Show the display on the default web browser
+        """
+        webbrowser.open(urljoin(self.url,  "view/" + self.name))
+
+
 
 class RemoteDisplayManager(object):
+    """ A manager used to create and delete the displays on an interactive server
+    """
     def __init__(self, url):
         self._url = url
         self._displays = {}
@@ -169,11 +221,15 @@ class RemoteDisplayManager(object):
 
     @property
     def createUrl(self):
+        """ The Url of the API used to create a new display
+        """
         return urljoin(self._url, "create")
 
 
     @property
     def deleteUrl(self):
+        """ The Url of the API used to delete a display
+        """
         return urljoin(self._url, "delete")
 
 

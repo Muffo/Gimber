@@ -83,6 +83,14 @@ class LocalDisplayTests(AbstractDisplayTests):
         self.assertIsInstance(actions[1], LoadImage)
 
 
+    def testLoadColorImage(self):
+        display = LocalDisplay()
+        # Create a syntethic random image with 3 channels (RGB)
+        image = np.array(np.random.rand(10, 8, 3) * 256, dtype=np.uint8)
+        display.loadImage(image)
+        assert_array_equal(display.tileCreator.image, image)
+
+
     def testClear(self):
         display = LocalDisplay()
         self.clear(display)

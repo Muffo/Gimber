@@ -78,20 +78,6 @@ class ActionParsingTests(unittest.TestCase):
         self.assertDictEqual(loadImageAction2.dict, loadImageDict)
 
 
-        # Create a syntethic random color image (3 channels)
-        image = np.array(np.random.rand(10, 8, 3) * 256, dtype=np.uint8)
-
-        loadImageDict = {
-             'atype': 'loadimage',
-             'image': base64.b64encode(image),
-             'shape': image.shape
-        }
-
-        loadImageAction = ActionParser.fromDict(loadImageDict)
-        self.assertIsInstance(loadImageAction, LoadImage)
-        assert_array_equal(loadImageAction.image, image)
-
-
         self.assertRaises(KeyError, ActionParser.fromDict, {
             'atype': 'loadimage',
             'image': base64.b64encode(image),
@@ -105,13 +91,7 @@ class ActionParsingTests(unittest.TestCase):
         self.assertRaises(ValueError, ActionParser.fromDict, {
             'atype': 'loadimage',
             'image': base64.b64encode(image),
-            'shape': (10, 11, 2)
-        })
-
-        self.assertRaises(ValueError, ActionParser.fromDict, {
-            'atype': 'loadimage',
-            'image': base64.b64encode(image),
-            'shape': (10, 11, 2, 2)
+            'shape': (10, 11, 12)
         })
 
 

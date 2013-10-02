@@ -1,16 +1,11 @@
 $(function() {
 	
     var map = L.map('map', {
-		maxZoom: 7,
+		maxZoom: 8,
 		minZoom: 0,
 		crs: L.CRS.Simple
 	}).setView([0, 0], 0);
 
-	// ? Sets a map view that contains the given geographical bounds with the maximum zoom level possible.
-	// map.fitBounds([
-    //    L.CRS.Simple.pointToLatLng(new L.Point(0, 0), 13),
-    //    L.CRS.Simple.pointToLatLng(new L.Point(500, 300), 13)
-    // ]);
 
 	var tileUrl = '/tile/' + displayId + '/{z}/{x}/{y}'
 	var tiles = L.tileLayer(tileUrl, {
@@ -24,25 +19,7 @@ $(function() {
 
 
 	/*
-	var m = {
-	  x: 0, 
-	  y: 0
-	}
-	var marker = L.marker(map.unproject([m.x, m.y], map.getMaxZoom())).addTo(map)
-		.bindPopup("<b>This is the center</b><br />");
-
-
-	L.marker([-255, 255]).addTo(map)
-		.bindPopup("<b>This is somewhere else</b><br />");
-
-
 	L.circle([5, -5], 10, {
-		color: 'red',
-		fillColor: '#f03',
-		fillOpacity: 0.5
-	}).addTo(map).bindPopup("I am a circle.");
-
-	L.circleMarker([5, 5], {
 		color: 'red',
 		fillColor: '#f03',
 		fillOpacity: 0.5

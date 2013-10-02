@@ -32,9 +32,11 @@ class InteractiveTileServer(GenericTileServer):
         # TODO: return a nice page with all the parameters
         return "The server is running!"
 
+
     def info(self):
-        # TODO: return server info in JSON format
-        return "The server is running!"
+        return {
+            'displays': self.displays.keys()
+        }
 
 
     def create(self):

@@ -131,15 +131,24 @@ class LoadImage(GenericAction):
         if not d.has_key('image'):
             raise KeyError("LoadImage requires 'image': the content of the image (base64)")
         if not d.has_key('shape'):
-            raise KeyError("AddPaths requires 'shape': [h, w] of the image")
+            raise KeyError("LoadImage requires 'shape': [h, w] of the image")
         if len(d['shape']) != 2:
-            raise ValueError("Unvalid format for AddPaths' parameter 'shape'")
+            raise ValueError("Unvalid format for LoadImage' parameter 'shape': " + str(d['shape']))
 
         # TODO: add support for custom dtype
         imageBuffer = base64.decodestring(d['image'])
         image = np.frombuffer(imageBuffer, dtype=np.uint8)
         image.shape = d['shape']
         return LoadImage(image)
+
+
+    @property
+    def dict(self):
+        return {
+             'atype': self.atype,
+             'image': base64.b64encode(self.image),
+             'shape': self.image.shape
+        }
 
 
 

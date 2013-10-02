@@ -131,7 +131,7 @@ class ImageEncoder(object):
         if ext[0] != ".":
             ext = "." + ext
 
-        if ext not in [".png", ".jpeg", ".jpg"]:
+        if ext not in [".png", ".jpeg", ".jpg", ".bmp"]:
             raise ValueError("Unsupported encoding: " + str(ext))
 
         if ext == ".png":
@@ -145,6 +145,10 @@ class ImageEncoder(object):
                 params = 95
             elif params < 0 or params > 100:
                 raise ValueError("JPEG quality can be from 0 to 100: " + str(params))
+
+        if ext == ".bmp":
+            if params is not None:
+                raise ValueError("BMP does not accept any parameter: " + str(params))
 
         self._ext = ext
         self._params = params
@@ -161,6 +165,9 @@ class ImageEncoder(object):
 
         elif self.ext in [".jpg", ".jpeg"]:
             return (cv2.cv.CV_IMWRITE_JPEG_QUALITY, self._params)
+
+        if self.ext == ".bmp":
+            return None
 
 
     @property

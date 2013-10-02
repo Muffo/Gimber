@@ -132,7 +132,7 @@ class LoadImage(GenericAction):
             raise KeyError("LoadImage requires 'image': the content of the image (base64)")
         if not d.has_key('shape'):
             raise KeyError("LoadImage requires 'shape': [h, w] of the image")
-        if len(d['shape']) != 2:
+        if len(d['shape']) != 2 and (len(d['shape']) == 3 and d['shape'][2] != 3):
             raise ValueError("Unvalid format for LoadImage' parameter 'shape': " + str(d['shape']))
 
         # TODO: add support for custom dtype

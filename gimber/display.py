@@ -211,11 +211,10 @@ class RemoteDisplayManager(object):
     """
     def __init__(self, url="http://localhost:8080"):
         self._url = url
-        self._displays = {}
         self._session = requests.Session()
 
         try:
-            self.session.get(self.infoUrl)
+           self.session.get(self.infoUrl).json()
         except ConnectionError:
             raise ConnectionError("Failed to connect to interactive server at url: " + url)
 
@@ -231,6 +230,13 @@ class RemoteDisplayManager(object):
         """
         return self._session
 
+
+    @property
+    def displays(self):
+        """ The lists of display names available on the server
+        """
+        response = self.session.get(self.infoUrl).json()
+        return response['displays']
 
     @property
     def createUrl(self):
@@ -264,6 +270,15 @@ class RemoteDisplayManager(object):
         if response['result'] != "ok":
             raise ServerSideError.fromDict(response)
         return RemoteDisplay(name, self.url)
+
+
+    def get(self, name):
+        """ Returns the display, possibly created on the server if it didn't exist before
+        """
+        if name in self.displays:
+            return RemoteDisplay(name, self.url)
+        else:
+            return self.create(name)
 
 
     def delete(self, name):

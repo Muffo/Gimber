@@ -52,3 +52,13 @@ body {
     background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
     background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
 }
+
+.pixel-info-control {
+  padding: 0px 8px;
+  font: 12px Arial, Helvetica, sans-serif;
+  background: white;
+  background: rgba(255,255,255,0.8);
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  border-radius: 5px;
+  min-width: 140px;
+}

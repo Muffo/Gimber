@@ -63,7 +63,7 @@ class TileCreator(object):
         return pow(2, z)
 
     def regionSize(self, z=0):
-        """Size on the image region at zoom leve = z"""
+        """Size on the image region at zoom level = z"""
         return self._tileSize / self.scaleFactor(z)
 
     def nCols(self, z):
@@ -99,7 +99,7 @@ class TileCreator(object):
         colStart = max(colStart, 0)
         colEnd = min(colEnd, self.width)
 
-        tile = self.image[rowStart:rowEnd, colStart:colEnd, :]
+        tile = self.image[rowStart:rowEnd, colStart:colEnd]
 
         scaleFactor = self.scaleFactor(z)
         if scaleFactor != 1:

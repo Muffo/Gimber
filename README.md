@@ -2,6 +2,20 @@
 
 **Interactive image web viewer**
 
+## Key Features
+ 
+- **OpenCV native support**: the application has been written with OpenCV and Python in mind, hence it comes with native support for the datastructures of the library. The porting of your pre-existing application to the new visualization library should be straightforward
+
+- **Multiple displays**: multiple displays can be shown simultaneously on different devices. Both PCs and mobile devices are supported. That means you can write the code on an interactive shell of your PC and display the images on your tablet
+
+- **Inteactive**: the user can load images at any time on the display or add overlays (i.e. lines and points). The changes are applied in real time on all the active displays
+
+- **Sub-pixel resolution**: the image and the overlays are kept separated. At high level of zoom the pixels of the image get visible, while the overlays are always drawn with sub-pixel accuracy
+
+- **Public HTTP API**: the display can be controlled with the public HTTP API from virtually any programming language, although a Python wrapper is given out of the box
+
+- **Platform independent server**: the server is written in Python and can run on all the major platforms
+
 
 ## Installation
 
@@ -30,10 +44,10 @@ OSX and Linux users can refer to the official installation instructions.
 #### Web Viewer
 
 The following Javascript libraries are used in the integrated web viewer:
-- Leaflet.js
-- Jquery
+- [Leaflet.js](http://leafletjs.com)
+- [Jquery](http://jquery.com)
 
-They will be downloaded from CDN, so you don't need to download them unless you plan to use the application offline.
+They will be automatically obtained from CDN, so you don't need to download them unless you plan to use the application offline.
 
 
 

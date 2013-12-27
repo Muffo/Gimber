@@ -15,7 +15,7 @@ import argparse
 
 serverParser = argparse.ArgumentParser(add_help=False)
 
-serverParser.add_argument("-H", "--host", default="localhost",
+serverParser.add_argument("-H", "--host", default="0.0.0.0",
                     help="Server host to bind to")
 
 serverParser.add_argument("-P", "--port", type=int, default=8080,

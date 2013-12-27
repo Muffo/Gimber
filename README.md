@@ -1,6 +1,6 @@
 # Gimber
 
-**Image tiles generator and interactive web viewer**
+**Interactive image web viewer**
 
 
 ## Installation
@@ -29,20 +29,88 @@ OSX and Linux users can refer to the official installation instructions.
 
 #### Web Viewer
 
-These Javascript libraries are used in the integrated web viewer. 
-They will be downloaded from CDN, so you don't need to download them unless you plan to use the application offline:
+The following Javascript libraries are used in the integrated web viewer:
 - Leaflet.js
 - Jquery
 
+They will be downloaded from CDN, so you don't need to download them unless you plan to use the application offline.
 
 
-## Usage
 
-The application can be used in 3 different modes:
+## Interactive display
+
+The Gimber server must be started in order to create the interactive display.
+
+Images can be dynamically loaded in the display using a public http API or the provided Python interface.
+The API can also be used to interact with the display: add points, lines, polygon...
+The documentation of the API is not ready yet. 
+Please refer to the python examples contained in the repository.
+
+The display can be viewed from any web browser, from both your PC and mobile device.
+
+At the moment this mode is not intended to be used with an Internet connection, but only for local purposes.
+For instance, it might be particularly useful when debugging an application written in Python+OpenCV.
+
+
+
+#### Example:
+
+    python -m gimber interactive
+
+#### Usage:
+
+python -m gimber interactive [-h] [-H HOST] [-P PORT] [-D] [-s TILESIZE] [-f {png,jpg}]
+                   			 [-c COMPRESSION] [-i {none,linear}] [-v | -q]
+
+
+Optional arguments:
+
+	-h, --help            show this help message and exit
+	-H HOST, --host HOST  Server host to bind to
+	-P PORT, --port PORT  Server port to bind to
+	-D, --debug           Run the server in debug mode
+	-s TILESIZE, --tilesize TILESIZE
+	                      Size of the tiles in pixels
+	-f {png,jpg}, --format {png,jpg}
+	                      Format of the images
+	-c COMPRESSION, --compression COMPRESSION
+	                      Compression for .png [1-9] or quality of the images
+	                      for .jpeg [1-100]
+	-i {none,linear}, --interp {none,linear}
+	                      Interpolation method used when scaling the images
+	-v, --verbose         Print additional debug information
+	-q, --quiet           Suppress all the output to console
+
+
+
+See also: [Zoom levels](#zoom-levels), [Image Formats](#image-formats)
+
+## Additional details
+
+### Zoom levels
+
+
+This will contains additional info about the zoom level:
+
+- A table
+- An example?
+
+
+### Image formats
+
+This will contains info about the file formats and parameters:
+
+- Supported types
+- Link to OpenCV ?
+
+TODO: complete this part
+
+
+## Other features
+
+The following features are also available:
 1. Offline tile generator: generate all the tiles for a given image and save all the images in a folder
 2. Static file server: start a web server that dynamically generates the tiles
-3. Interactive display: show images and add overlays (point, line...) at runtime
-
 
 ### Offline tiles generator
 
@@ -134,68 +202,3 @@ Optional arguments:
 	-d DIR, --dir DIR     Directory that contains the image
 
 See also: [Zoom levels](#zoom-levels), [Image Formats](#image-formats)
-
-
-### Interactive display
-
-Create an interactive display. 
-Images can be dynamically loaded in the display using a public http API or the provided Python interface.
-It is possible to interact with the display (loading an image, add points, lines, polygon...) using the public API.
-
-The display can be viewed using any web browser, from both your PC and mobile device.
-
-At the moment this mode is not intended to be used with an Internet connection, but only for local purposes.
-For instance, it might be particularly useful in combination with OpenCV.
-
-
-
-#### Example:
-
-    python -m gimber interactive
-
-#### Usage:
-
-python -m gimber interactive [-h] [-H HOST] [-P PORT] [-D] [-s TILESIZE] [-f {png,jpg}]
-                   			 [-c COMPRESSION] [-i {none,linear}] [-v | -q]
-
-
-Optional arguments:
-
-	-h, --help            show this help message and exit
-	-H HOST, --host HOST  Server host to bind to
-	-P PORT, --port PORT  Server port to bind to
-	-D, --debug           Run the server in debug mode
-	-s TILESIZE, --tilesize TILESIZE
-	                      Size of the tiles in pixels
-	-f {png,jpg}, --format {png,jpg}
-	                      Format of the images
-	-c COMPRESSION, --compression COMPRESSION
-	                      Compression for .png [1-9] or quality of the images
-	                      for .jpeg [1-100]
-	-i {none,linear}, --interp {none,linear}
-	                      Interpolation method used when scaling the images
-	-v, --verbose         Print additional debug information
-	-q, --quiet           Suppress all the output to console
-
-
-
-See also: [Zoom levels](#zoom-levels), [Image Formats](#image-formats)
-
-## Additional details
-
-
-### Zoom levels
-
-
-This will contains additional info about the zoom level:
-
-- A table
-- An example?
-
-
-### Image formats
-
-This will contains info about the file formats and parameters:
-
-- Supported types
-- Link to OpenCV ?

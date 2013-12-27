@@ -1,184 +1,199 @@
-$(function() {
-	
-    var map = L.map('map', {
-		maxZoom: 8,
+function GimberViewPort(displayId, divId) {
+
+	// Setting of the image map
+	var _mapSettings = {
+		maxZoom: 21,
 		minZoom: 0,
 		crs: L.CRS.Simple
-	}).setView([0, 0], 0);
+	}
+
+	// Actual zoom level when zoom is supposed to be 0
+	// This is used to obtain negative zoom level 
+	var _zoomOffset = -3
+
+	// Array containing the pixel values of the current image
+	var _imageArray = null
+
+	// Shape (width x eight x channels) of the current image
+	var _imageShape = null
+
+	// Tile layer object
+	var _tiles = null
+
+	// Map object
+	var _imgMap = L.map(divId, _mapSettings).setView([0, 0], 0)
+	
+	// Overlay layer object
+	var _overlays = L.layerGroup().addTo(_imgMap)
 
 
-	var tileUrl = '/tile/' + displayId + '/{z}/{x}/{y}'
-	var zoomOffset = -3
 
-	var tiles = L.tileLayer(tileUrl, {
-		attribution: 'Gimber',
-		zoomOffset: zoomOffset,
-		continuousWorld: true
-	}).addTo(map);
-
-
-	var overlays = L.layerGroup().addTo(map)
-
-
-	/*
-	L.circle([5, -5], 10, {
-		color: 'red',
-		fillColor: '#f03',
-		fillOpacity: 0.5
-	}).addTo(map).bindPopup("I am a circle.");
-
-
-	L.polygon([
-		[-10, -10],
-		[-10, 10],
-		[10, 10],
-		[10, -10]
-	]).addTo(map).bindPopup("I am a polygon.");
-	*/
-
-
-	// -----------------------------------------------------------------
-
-	var imageArray = null
-	var imageShape = null
-
-	function loadImage(image, shape) {
+	// Load an image with the specified size in the display
+	this.loadImage = function (image, shape) {
 		var raw = window.atob(image)
 		var rawLength = raw.length
-		imageArray = new Uint8Array(new ArrayBuffer(rawLength))
-
-		for(i = 0; i < rawLength; i++) {
-			imageArray[i] = raw.charCodeAt(i)
+		
+		_imageShape = shape
+		_imageArray = new Uint8Array(new ArrayBuffer(rawLength))
+		for(i = 0; i < rawLength; i++)
+			_imageArray[i] = raw.charCodeAt(i)
+		
+		if (_tiles !== null) {
+			// Force the display to reload the tiles
+			_tiles.redraw()
 		}
-		imageShape = shape
+		else {
+			var tileUrl = '/tile/' + displayId + '/{z}/{x}/{y}'
+			var tileSettings = {
+				attribution: 'Gimber',
+				zoomOffset: _zoomOffset,
+				continuousWorld: true,
+				maxNativeZoom: 8
+			}
 
-		tiles.redraw()
+			_tiles = L.tileLayer(tileUrl, tileSettings).addTo(_imgMap);
+		}
 	}
 
 
-	function unproject(point) {
-		return [-point[1] * Math.pow(2, zoomOffset), point[0] * Math.pow(2, zoomOffset)]
-	}
-
-
-	function addPaths(paths) {
+	this.addPaths = function (paths) {
 		$.each(paths, function(index, path){
 			switch (path.ptype) {
 				case "marker":
-					point = unproject(path.point)
-					if (Object.keys(path.options).length != 0) {
-						var marker = L.circleMarker(point, path.options)
-					} else {
-						var marker = L.circleMarker(point, 
-							{'radius': 3, 'color': 'blue', 'fillColor': 'red'})
-					}
-					marker.bindPopup("x=" + path.point[0] + " y=" + path.point[1])
-					overlays.addLayer(marker) 
-					
+					var point = unproject(path.point)
+					var marker = L.circleMarker(point, path.options)
+					var popupText = "x=" + path.point[0].toFixed(2) + " y=" + path.point[1].toFixed(2)
+					marker.bindPopup(popupText)
+					_overlays.addLayer(marker)
 					break
 
 				case "line":
-					if (Object.keys(path.options).length != 0) {
-						var line = L.circleMarker(unproject(path.points[0]), path.options)
-					} else {
-						var line = L.circleMarker(unproject(path.points[0]), 
-							{'radius': 3, 'color': 'blue', 'fillColor': 'red'})
-					}
-					overlays.addLayer(line) 
+					var line = L.polyline(unprojectArray(path.points), path.options)
+					_overlays.addLayer(line) 
 					break
 			}
 		})
 	}
 
 
-	function clearPaths() {
-		overlays.clearLayers()
+	this.clearPaths = function() {
+		_overlays.clearLayers()
 	}
 
-
-	function dispatch(action) {
-		switch (action.atype) {
-			case "loadimage":
-				loadImage(action.image, action.shape)
-				break
-
-			case "addpaths":
-				addPaths(action.paths)
-				break
-			
-			case "clearpaths":
-				clearPaths()
-				break
-
-			case "empty":
-				break
-		}
-	}
-
-	// ------------------------------------------------------------------
+	
+	// -------------- Pixel Information Control -----------------------
 
 	var PixelInfoControl = L.Control.extend({
 	    options: {
 	        position: 'topright'
 	    },
 
-	    onAdd: function (map) {
-	        container = L.DomUtil.create('div', 'pixel-info-control');
+	    onAdd: function (imgMap) {
+	        var container = L.DomUtil.create('div', 'pixel-info-control');
 	        container.innerHTML = "<p>Pixel Info Control</p>"
 
 	        function onMapMouseMove(e) {
-		    	x = e.latlng.lng / Math.pow(2, zoomOffset)
-				y = -e.latlng.lat / Math.pow(2, zoomOffset)
-				container.innerHTML = "<p>x=" + x.toFixed(3) + " y=" + y.toFixed(3) + "</p>"
+		    	x = e.latlng.lng / Math.pow(2, _zoomOffset)
+				y = -e.latlng.lat / Math.pow(2, _zoomOffset)
+				container.innerHTML = "<p>x=" + x.toFixed(2) + " y=" + y.toFixed(2) + "</p>"
 
-				if (imageArray === null)
+				if (_imageArray === null)
 					return
 
-				if (x < 0 || x > imageShape[1] || y < 0 || x > imageShape[0])
+				if (x < 0 || x > _imageShape[1] || y < 0 || x > _imageShape[0])
 					return 
 
-				if (imageShape.length == 2) {
-					var intensity = imageArray[Math.floor(x) + Math.floor(y) * imageShape[1]]
+				if (_imageShape.length == 2) {
+					var intensity = _imageArray[Math.floor(x) + Math.floor(y) * _imageShape[1]]
 					var colorStr = "<p>Intensity: " + intensity
 					colorStr += ' <span style="border: 1px;display: block;background: rgb('+ intensity +', '+ intensity +', '+ intensity +'); float: right;width: 15px;height: 15px;"> </span>'
 					colorStr += "</p>"
 				}
 				else {
-					var colorR = imageArray[3 * Math.floor(x) + 3 * Math.floor(y) * imageShape[1]]
-					var colorG = imageArray[3 * Math.floor(x) + 3 * Math.floor(y) * imageShape[1] + 1]
-					var colorB = imageArray[3 * Math.floor(x) + 3 * Math.floor(y) * imageShape[1] + 2]
-					var colorStr = "<p>Color: (" + colorR + ", " + colorG + ", " + colorB + ")"
-					colorStr += ' <span style="border: 1px;display: block;background: rgb('+ colorR +', '+ colorG +', '+ colorB +'); float: right;width: 15px;height: 15px;"> </span>'
-					colorStr += "</p>"
+					var pixelIndex = 3 * Math.floor(x) + 3 * Math.floor(y) * _imageShape[1]
+					var colorR = _imageArray[pixelIndex]
+					var colorG = _imageArray[pixelIndex + 1]
+					var colorB = _imageArray[pixelIndex + 2]
+					var colorStr = '<p>Color: (' + colorR + ', ' + colorG + ', ' + colorB + ') '
+					colorStr += '<span style="border: 1px;display: block;background: rgb('+ colorR +', '+ colorG +', '+ colorB +'); float: right;width: 15px;height: 15px;"> </span>'
+					colorStr += '</p>'
 				}
 
 				container.innerHTML += colorStr
 		    }
 
-	        map.on('mousemove', onMapMouseMove);
-
-	        return container;
+	        imgMap.on('mousemove', onMapMouseMove)
+	        return container
 	    }
 	});
 
-	map.addControl(new PixelInfoControl());
+	_imgMap.addControl(new PixelInfoControl())	
 
-	// -----------------------------------------------------------------
 
-	var actionsUrl = '/actions/' + displayId + '/'
-	var last = 0
+	// ------------------- Auxiliary functions ---------------------------
+
+	function unproject(point) {
+		var scale = Math.pow(2, _zoomOffset)
+		return [-point[1] * scale, point[0] * scale]
+	}
+
+
+	function unprojectArray(points) {
+		$.each(points, function(i, point){
+			points[i] = unproject(point)
+		})
+		return points
+	}
+}
+
+// ========================================================================
+
+
+function ActionsManager(gimberViewPort, actionsServerUrl) {
+
+	var _gimberViewPort = gimberViewPort
+	var _actionsUrl = actionsServerUrl
+	var _last = 0
+	var _delay = 500
+	var _timerId = null
+
+
 	function queryActions() {
-		$.getJSON(actionsUrl + last, function(data) {
+		$.getJSON(_actionsUrl + _last, function(data) {
 			// TODO: check data.result == "ok"
 
-			last = last + data.actions.length
+			_last = _last + data.actions.length
 
 			$.each(data.actions, function(index, action){
-				dispatch(action)
+				switch (action.atype) {
+				case "loadimage":
+					_gimberViewPort.loadImage(action.image, action.shape)
+					break
+
+				case "addpaths":
+					_gimberViewPort.addPaths(action.paths)
+					break
+				
+				case "clearpaths":
+					_gimberViewPort.clearPaths()
+					break
+
+				case "empty":
+					break
+				}
 			})
-			setTimeout(queryActions, 500)
+			_timerId = setTimeout(queryActions, _delay)
 		});
 	}
 
-	queryActions()
-});
+
+	this.start = function () {
+		queryActions()
+	}
+
+	this.stop = function () {
+		clearTimeout(_timerId)
+		_timerId = null
+	}
+
+}

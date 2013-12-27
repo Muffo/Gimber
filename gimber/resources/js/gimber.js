@@ -2,7 +2,7 @@ function GimberViewPort(displayId, divId) {
 
 	// Setting of the image map
 	var _mapSettings = {
-		maxZoom: 21,
+		maxZoom: 10	,
 		minZoom: 0,
 		crs: L.CRS.Simple
 	}
@@ -21,7 +21,7 @@ function GimberViewPort(displayId, divId) {
 	var _tiles = null
 
 	// Map object
-	var _imgMap = L.map(divId, _mapSettings).setView([0, 0], 0)
+	var _imgMap = L.map(divId, _mapSettings).setView([0, 0], -_zoomOffset)
 	
 	// Overlay layer object
 	var _overlays = L.layerGroup().addTo(_imgMap)
@@ -53,6 +53,11 @@ function GimberViewPort(displayId, divId) {
 
 			_tiles = L.tileLayer(tileUrl, tileSettings).addTo(_imgMap);
 		}
+
+		_imgMap.setZoom(-_zoomOffset)
+
+		var center = L.latLng(-_imageShape[1] * Math.pow(2, _zoomOffset) / 2, _imageShape[0] * Math.pow(2, _zoomOffset) / 2)
+		_imgMap.panTo(center)
 	}
 
 
@@ -146,7 +151,7 @@ function GimberViewPort(displayId, divId) {
 	}
 }
 
-// ========================================================================
+// ========================================================================	
 
 
 function ActionsManager(gimberViewPort, actionsServerUrl) {

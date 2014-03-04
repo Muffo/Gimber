@@ -22,7 +22,8 @@
 At the moment there is no ready-to-use Python package.
 
 First, you should make sure to fulfill all the libraries requirements. 
-Then, download the source code here and add the gimber package in your PYTHONPATH. run gimber.py.
+Then, download the source code here and add the gimber package in your PYTHONPATH. 
+
 
 ### Requirements:
 

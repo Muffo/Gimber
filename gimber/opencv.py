@@ -1,6 +1,29 @@
 """ Auxiliary methods to replicate some OpenCV drawing function
 """
 
+from gimber import Marker, Line, AddPaths
+
+
+def imshow(winname, image):
+    """ Displays an image in the specified window.
+    The function imshow displays an image in the specified window and returns the display object to perform
+    further interactions.
+
+    The function may scale the image, depending on its depth:
+
+    - If the image is 8-bit unsigned, it is displayed as is.
+    - If the image is 16-bit unsigned or 32-bit integer, the pixels are divided by 256.
+        That is, the value range [0,255*256] is mapped to [0,255].
+    - If the image is 32-bit floating-point, the pixel values are multiplied by 255.
+        That is, the value range [0,1] is mapped to [0,255].
+
+    :param winname: Name of the window.
+    :param image: Image to be shown.
+    :returns display: Display object where the image has been showed
+    """
+
+    # This would require a RemoteDisplayManager...
+    raise NotImplementedError()
 
 def drawChessboardCorners(display, patternSize, corners, patternWasFound):
     """ Renders the detected chessboard corners.
@@ -15,10 +38,12 @@ def drawChessboardCorners(display, patternSize, corners, patternWasFound):
     """
     if len(patternSize) != 2:
         raise ValueError("Pattern size format is not valid: " + str(patternSize))
-
     if len(corners.shape) != 3 or corners.shape[1] != 1 or corners.shape[2] != 2:
         raise ValueError("Corners format is not valid")
 
+    # All the paths are added to the display at once to reduce the number of requests to the server
+    paths = []
+    prevPoint = None
     colors = ['red', 'orange', 'yellow', 'lawngreen', 'lightblue', 'mediumblue', 'magenta']
 
     for r in range(patternSize[1]):
@@ -27,7 +52,12 @@ def drawChessboardCorners(display, patternSize, corners, patternWasFound):
         for c in range(patternSize[0]):
             idx = c + patternSize[0] * r
             point = corners[idx][0]
-            display.addMarker(point, options={'radius': 3, 'color': color, 'fillColor': color})
+            if prevPoint is not None:
+                paths.append(Line([prevPoint, point], options={'color': color, 'weight': 3}))
+            prevPoint = point
+            paths.append(Marker(point, options={'radius': 4, 'weight': 6, 'color': color, 'fillColor': color}))
+
+    display.do(AddPaths(paths))
 
 
 
@@ -50,4 +80,4 @@ def drawContours(display, contours, contourIdx, color, thickness, lineType, hier
 
     The function draws contour outlines in the image if \texttt{thickness} \ge 0 or fills the area bounded by the contours if \texttt{thickness}<0 .
     """
-    pass
+    raise NotImplementedError()

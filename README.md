@@ -38,7 +38,9 @@ These Python libraries must be installed in order to run the server on you machi
 [BottlePy](http://bottlepy.org) consists of a single file and it can be manually copied in the PYTHONPATH.
 
 Windows users can find the installer for OpenCV and Gevent [here](http://www.lfd.uci.edu/~gohlke/pythonlibs/).
-OSX and Linux users can refer to the official installation instructions.
+OSX and Linux users can refer to the official installation instructions or use pip:
+
+	pip install bottle gevent urllib3 requests
 
 
 #### Web Viewer

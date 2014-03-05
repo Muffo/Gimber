@@ -2,6 +2,11 @@
 
 **Interactive image web viewer**
 
+[![Watch the demo on Youtube](http://img.youtube.com/vi/-RP3ylIXGQE/2.jpg)](http://www.youtube.com/watch?v=-RP3ylIXGQE)
+
+[Watch the demo on Youtube](http://www.youtube.com/watch?v=-RP3ylIXGQE)
+
+
 ## Key Features
  
 - **OpenCV native support**: the application has been written with OpenCV and Python in mind, hence it comes with native support for the datastructures of the library. The porting of your pre-existing application to the new visualization library should be straightforward
